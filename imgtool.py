@@ -78,13 +78,13 @@ def validate_args_single_file(input_file: str, output_file: str) -> bool:
         return False
 
     # Check if the input file is a .jpg file
-    if not input_file.endswith(".jpg"):
-        print(f" ❌ \033[1;35mInput file needs to be a .jpg file:\033[1;36m {input_file}\033[0m")
+    if not input_file.endswith((".jpg", ".jpeg")):
+        print(f" ❌ \033[1;35mInput file needs to be a (.jpg, .jpeg) file:\033[1;36m {input_file}\033[0m")
         return False
 
     # Check if the output file is a .jpg file
-    if not output_file.endswith(".jpg"):
-        ask = f" ❔ \033[1;31mOutput file \033[1;36m\"{output_file}\"\033[1;31m does not end with \".jpg\". Are you sure you want to continue?\033[1;36m (y/n)\033[0m "
+    if not output_file.endswith((".jpg", ".jpeg")):
+        ask = f" ❔ \033[1;31mOutput file \033[1;36m\"{output_file}\"\033[1;31m does not end with (\".jpg\", \".jpeg\"). Are you sure you want to continue?\033[1;36m (y/n)\033[0m "
         confirm = input(ask)
         if confirm == "No" or confirm == "no" or confirm == "N" or confirm == "n":
             return False
@@ -151,8 +151,9 @@ def main():
         if not validate_args_batch(input_folder):
             return
 
-        pattern = "**/*.jpg" if recursive else "*.jpg"
-        jpg_files = list(input_folder.glob(pattern))
+        pattern1 = "**/*.jpg" if recursive else "*.jpg"
+        pattern2 = "**/*.jpeg" if recursive else "*.jpeg"
+        jpg_files = list(input_folder.glob(pattern1)) + list(input_folder.glob(pattern2))
         if not jpg_files:
             print(" ❌ \033[1;35mNo JPG files found in the input folder.\033[0m")
             return
