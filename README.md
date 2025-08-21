@@ -29,10 +29,13 @@ Supports:
 
 ## 🛠️ Installation
 
+- **Python 3.12.3**
+- **Ghostscript 9.55.0**
+
 ### 1. Clone the repository:
 
 ```bash
-git clone https://github.com/th92rodr/filetool-cli.git
+git clone git@github.com:th92rodr/filetool-cli.git
 cd filetool-cli
 ```
 
@@ -61,6 +64,14 @@ sudo apt install ghostscript
 
 ```bash
 brew install ghostscript
+```
+
+The current version being used is: **Ghostscript 9.55.0**
+
+You can check your Ghostscript version with:
+
+```bash
+gs --version
 ```
 
 ---
