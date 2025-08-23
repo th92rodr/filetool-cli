@@ -9,7 +9,7 @@
 ### ############################################################
 
 import argparse
-import os
+import os, sys
 from PIL import Image
 from pathlib import Path
 
@@ -22,7 +22,7 @@ def compress_image(
     max_height: int = None,
 ) -> None:
     """
-    Remove metadata and compress a JPG image.
+    Remove all metadata (EXIF, GPS, camera info, copyright) and compress a JPG image.
 
     Args:
         input_file (str): Input image path.
@@ -52,7 +52,8 @@ def compress_image(
             )
 
     except Exception as e:
-        print(f" ❌ \033[1;35mError processing \033[1;36m{input_file}\033[1;35m:\033[1;36m {e}\033[0m")
+        print(f" ❌ \033[1;35mError processing \033[1;36m{input_file}\033[1;35m:\033[1;36m {e}\033[0m", file=sys.stderr)
+        sys.exit(1)
 
 
 def validate_quality(quality: int) -> bool:
