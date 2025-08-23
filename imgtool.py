@@ -191,7 +191,7 @@ def main():
     # Single File Mode
     else:
         input_file = args.input
-        output_file = args.output if args.output else f"{Path(input_file).stem}_compressed.jpg"
+        output_file = args.output if args.output else f"{Path(input_file).stem}_compressed{Path(input_file).suffix}"
 
         if not validate_args_single_file(input_file=input_file, output_file=output_file):
             return
