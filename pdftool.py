@@ -9,7 +9,7 @@
 ### ############################################################
 
 import argparse
-import os, re, subprocess
+import os, re, subprocess, sys
 from pathlib import Path
 from pypdf import PdfReader, PdfWriter
 
@@ -79,8 +79,8 @@ def compress_pdf(input_path: str, output_path: str, quality: str = "ebook") -> N
     try:
         subprocess.run(gs_command, check=True)
     except subprocess.CalledProcessError:
-        print(" ❌ \033[1;35mGhostscript compression failed.\033[0m")
-        return
+        print(" ❌ \033[1;35mGhostscript compression failed.\033[0m", file=sys.stderr)
+        sys.exit(1)
 
 
 def process_file(input_file: str, output_file: str, compression: str):
