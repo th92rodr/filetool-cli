@@ -13,21 +13,36 @@ Supports:
 
 ---
 
-## 🚀 Features
+## 🎯 Features
 
 - 📄 **PDF Tool (`pdftool`)**
-  - Compress PDF files at various quality levels
-  - Remove metadata (Title, Author, XMP, Info dictionaries)
-  - Batch mode and recursive folder support
+  - Compress PDF files at different quality levels using Ghostscript
+  - Remove all metadata (Title, Author, Info dictionary, XMP, Metadata streams)
+  - Handle case-insensitive file extensions (`.pdf`, `.PDF`, `.pDf`, …)
+  - **Batch mode**
+    - Automatically create the output folder if it doesn’t exist
+    - If no output folder is specified, defaults to: `<input_folder_name>_compressed`
+    - In recursive mode: preserve folder structure, keep filenames/extensions, skip non-PDF files safely
+  - **Single file mode**
+    - If no output file is specified, defaults to: `<input_file_name>_compressed.<extension>`
+    - If the output file already exists, asks for confirmation before overwriting
 
 - 🖼️ **Image Tool (`imgtool`)**
-  - Compress JPG images
-  - Strip EXIF and other metadata
-  - Batch process with optional recursion
+  - Compress JPG images with adjustable quality (1–95)
+  - Strip all metadata (EXIF, GPS, camera info, copyright)
+  - Optional image resizing by width/height
+  - Handle case-insensitive file extensions (`.jpg`, `.jpeg`, `.JPG`, `.JPEG`, …)
+  - **Batch mode**
+    - Automatically create the output folder if it doesn’t exist
+    - If no output folder is specified, defaults to: `<input_folder_name>_compressed`
+    - In recursive mode: preserve folder structure, keep filenames/extensions, skip non-image files safely
+  - **Single file mode**
+    - If no output file is specified, defaults to: `<input_file_name>_compressed.<extension>`
+    - If the output file already exists, asks for confirmation before overwriting
 
 ---
 
-## 🛠️ Installation
+## 🧭 Installation
 
 - **Python 3.12.3**
 - **Ghostscript 9.55.0**
@@ -76,7 +91,7 @@ gs --version
 
 ---
 
-## 📦 Usage
+## 🕹️ Usage
 
 ### 🔹 PDF Tool
 
@@ -160,7 +175,7 @@ python imgtool.py -I ./images -O ./compressed -r -q 70
 
 ---
 
-## 📄 License
+## 📜 License
 
 This project is licensed under the [MIT License](LICENSE.md).
 
@@ -172,4 +187,4 @@ Pull requests are welcome. Feel free to open issues for suggestions, bugs, or en
 
 ---
 
-## ⭐️ Give it a star if you like this project!
+## 🎖️ Give it a star if you like this project!
