@@ -152,6 +152,7 @@ def main():
         if not validate_args_batch(input_folder):
             return
 
+        # This way .jpg, .JPG, .jpeg, .JPEG (and even mixed case like .JpEg) are matched
         extensions = [".jpg", ".jpeg"]
         jpg_files = [
             f for f in (input_folder.rglob("*") if recursive else input_folder.glob("*"))
