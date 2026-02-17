@@ -56,60 +56,131 @@ def compress_image(
         sys.exit(1)
 
 
-def validate_quality(quality: int) -> bool:
+def single_file_mode(args) -> None:
+    input_file = args.input
+    output_file = args.output if args.output else f"{Path(input_file).stem}_compressed{Path(input_file).suffix}"
+
+    quality = args.quality
+    max_width = args.max_width
+    max_height = args.max_height
+    verbose = args.verbose
+
+    validate_quality(quality=quality)
+    validate_args_single_file(input_file=input_file, output_file=output_file)
+
+    log(verbose=verbose,
+        message=f"\n 🚀 \033[1;37m Processing:\033[1;32m  {Path(input_file).name}\033[0m")
+
+    compress_image(
+        input_file=input_file,
+        output_file=output_file,
+        quality=quality,
+        max_width=max_width,
+        max_height=max_height,
+    )
+
+    input_size = str(os.path.getsize(input_file) / 1000000)
+    output_size = str(os.path.getsize(output_file) / 1000000)
+
+    log(verbose=verbose,
+        message=f" ✅ \033[1;37m Compression completed:\n\033[1;32m   Input file size: {input_size} MB\n   Output file size: {output_size} MB\033[0m")
+
+
+def batch_file_mode(args) -> None:
+    input_folder = Path(args.input_folder)
+    output_folder = Path(args.output_folder) if args.output_folder else Path(f"{input_folder}_compressed")
+
+    quality = args.quality
+    max_width = args.max_width
+    max_height = args.max_height
+    recursive = args.recursive
+    verbose = args.verbose
+
+    validate_quality(quality=quality)
+    validate_args_batch_file(input_folder=input_folder)
+
+    # This way .jpg, .JPG, .jpeg, .JPEG (and even mixed case like .JpEg) are matched
+    extensions = [".jpg", ".jpeg"]
+    jpg_files = [
+        f for f in (input_folder.rglob("*") if recursive else input_folder.glob("*"))
+        if f.suffix.lower() in extensions
+    ]
+
+    if not jpg_files:
+        print(" ❌ \033[1;35mNo JPG files found in the input folder.\033[0m")
+        return
+
+    output_folder.mkdir(parents=True, exist_ok=True)
+
+    for jpg in jpg_files:
+        relative_path = jpg.relative_to(input_folder)
+        output_file = output_folder / relative_path
+
+        output_file.parent.mkdir(parents=True, exist_ok=True)
+
+        log(verbose=verbose,
+            message=f"\n 🚀 \033[1;37m Processing:\033[1;32m  {jpg.name}\033[0m")
+
+        compress_image(
+            input_file=jpg,
+            output_file=output_file,
+            quality=quality,
+            max_width=max_width,
+            max_height=max_height,
+        )
+
+        input_size = str(os.path.getsize(jpg) / 1000000)
+        output_size = str(os.path.getsize(output_file) / 1000000)
+
+        log(verbose=verbose,
+            message=f" ✅ \033[1;37m Compression completed:\n\033[1;32m   Input file size: {input_size} MB\n   Output file size: {output_size} MB\033[0m")
+
+    log(verbose=verbose,
+        message=f"\n\033[1;37m  Batch compression completed.\033[1;32m {len(jpg_files)}\033[1;37m files processed and saved at:\033[1;32m {output_folder}/\033[0m")
+
+
+def validate_quality(quality: int) -> None:
     # Check if the quality is valid
     if quality not in range(1, 95):
-        print(f" ❌ \033[1;35mInvalid quality value:\033[1;36m {quality}\033[0m")
-        return False
-    return True
+        print(f" ❌ \033[1;35mInvalid quality value:\033[1;36m {quality}\033[0m", file=sys.stderr)
+        sys.exit(2)
 
 
-def validate_recursive(args) -> bool:
-    # Check if the recursive is being in batch mode
-    if args.recursive and not args.input_folder:
-        print(" ❌ \033[1;35mThe \033[1;36m--recursive\033[1;35m flag is only valid when using \033[1;36m--input-folder\033[0m")
-        return False
-    return True
-
-
-def validate_args_single_file(input_file: str, output_file: str) -> bool:
+def validate_args_single_file(input_file: str, output_file: str) -> None:
     # Check if the input file exists
     if not os.path.isfile(input_file):
-        print(f" ❌ \033[1;35mInput file does not exist:\033[1;36m {input_file}\033[0m")
-        return False
+        print(f" ❌ \033[1;35mInput file does not exist:\033[1;36m {input_file}\033[0m", file=sys.stderr)
+        sys.exit(2)
 
     # Check if the input file is a .jpg file
     if not input_file.lower().endswith((".jpg", ".jpeg")):
-        print(f" ❌ \033[1;35mInput file needs to be a (.jpg, .jpeg) file:\033[1;36m {input_file}\033[0m")
-        return False
+        print(f" ❌ \033[1;35mInput file needs to be a (.jpg, .jpeg) file:\033[1;36m {input_file}\033[0m", file=sys.stderr)
+        sys.exit(2)
 
     # Check if the output file is a .jpg file
     if not output_file.lower().endswith((".jpg", ".jpeg")):
         ask = f" ❔ \033[1;31mOutput file \033[1;36m\"{output_file}\"\033[1;31m does not end with (\".jpg\", \".jpeg\"). Are you sure you want to continue?\033[1;36m (y/n)\033[0m "
         confirm = input(ask)
-        if confirm == "No" or confirm == "no" or confirm == "N" or confirm == "n":
-            return False
-        elif confirm != "Yes" and confirm != "yes" and confirm != "Y" and confirm != "y":
-            return False
+        if confirm in ("No", "no", "N", "n"):
+            sys.exit(2)
+        elif confirm not in ("Yes", "yes", "Y", "y"):
+            sys.exit(2)
 
     # Check to make sure the user really wants to overwrite the existing file with the new output file
     if os.path.isfile(output_file):
         ask = f" ❔ \033[1;31mOutput file \033[1;36m\"{output_file}\"\033[1;31m already exists. Are you sure you want to overwrite it?\033[1;36m (y/n)\033[0m "
         confirm = input(ask)
-        if confirm == "No" or confirm == "no" or confirm == "N" or confirm == "n":
-            return False
-        elif confirm != "Yes" and confirm != "yes" and confirm != "Y" and confirm != "y":
-            return False
-
-    return True
+        if confirm in ("No", "no", "N", "n"):
+            sys.exit(2)
+        elif confirm not in ("Yes", "yes", "Y", "y"):
+            sys.exit(2)
 
 
-def validate_args_batch(input_folder: str) -> bool:
+def validate_args_batch_file(input_folder: str) -> None:
     # Check if the input folder exists
     if not os.path.isdir(input_folder):
-        print(f" ❌ \033[1;35mInput folder does not exist:\033[1;36m {input_folder}\033[0m")
-        return False
-    return True
+        print(f" ❌ \033[1;35mInput folder does not exist:\033[1;36m {input_folder}\033[0m", file=sys.stderr)
+        sys.exit(2)
 
 
 def log(message: str, verbose: bool) -> None:
@@ -137,82 +208,13 @@ def main():
 
     args = parser.parse_args()
 
-    quality = args.quality
-    verbose = args.verbose
-
-    if not validate_quality(quality) or not validate_recursive(args):
-        return
-
     # Batch Mode
     if args.input_folder:
-        input_folder = Path(args.input_folder)
-        output_folder = Path(args.output_folder) if args.output_folder else Path(f"{input_folder}_compressed")
-        recursive = args.recursive
-
-        if not validate_args_batch(input_folder):
-            return
-
-        # This way .jpg, .JPG, .jpeg, .JPEG (and even mixed case like .JpEg) are matched
-        extensions = [".jpg", ".jpeg"]
-        jpg_files = [
-            f for f in (input_folder.rglob("*") if recursive else input_folder.glob("*"))
-            if f.suffix.lower() in extensions
-        ]
-
-        if not jpg_files:
-            print(" ❌ \033[1;35mNo JPG files found in the input folder.\033[0m")
-            return
-
-        output_folder.mkdir(parents=True, exist_ok=True)
-
-        for jpg in jpg_files:
-            relative_path = jpg.relative_to(input_folder)
-            output_file = output_folder / relative_path
-
-            output_file.parent.mkdir(parents=True, exist_ok=True)
-
-            log(verbose=verbose,
-                message=f"\n 🚀 \033[1;37m Processing:\033[1;32m  {jpg.name}\033[0m")
-
-            compress_image(
-                input_file=jpg,
-                output_file=output_file,
-                quality=args.quality,
-                max_width=args.max_width,
-                max_height=args.max_height,
-            )
-
-            input_size = str(os.path.getsize(jpg) / 1000000)
-            output_size = str(os.path.getsize(output_file) / 1000000)
-            log(verbose=verbose,
-                message=f" ✅ \033[1;37m Compression completed:\n\033[1;32m   Input file size: {input_size} MB\n   Output file size: {output_size} MB\033[0m")
-
-        log(verbose=verbose,
-            message=f"\n\033[1;37m  Batch compression completed.\033[1;32m {len(jpg_files)}\033[1;37m files processed and saved at:\033[1;32m {output_folder}/\033[0m")
+        batch_file_mode(args=args)
 
     # Single File Mode
     else:
-        input_file = args.input
-        output_file = args.output if args.output else f"{Path(input_file).stem}_compressed{Path(input_file).suffix}"
-
-        if not validate_args_single_file(input_file=input_file, output_file=output_file):
-            return
-
-        log(verbose=verbose,
-            message=f"\n 🚀 \033[1;37m Processing:\033[1;32m  {Path(input_file).name}\033[0m")
-
-        compress_image(
-            input_file=input_file,
-            output_file=output_file,
-            quality=args.quality,
-            max_width=args.max_width,
-            max_height=args.max_height,
-        )
-
-        input_size = str(os.path.getsize(input_file) / 1000000)
-        output_size = str(os.path.getsize(output_file) / 1000000)
-        log(verbose=verbose,
-            message=f" ✅ \033[1;37m Compression completed:\n\033[1;32m   Input file size: {input_size} MB\n   Output file size: {output_size} MB\033[0m")
+        single_file_mode(args=args)
 
 
 if __name__ == "__main__":
