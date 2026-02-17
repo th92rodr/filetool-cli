@@ -20,6 +20,7 @@ def compress_image(
     quality: int = 85,
     max_width: int = None,
     max_height: int = None,
+    delete_original: bool = False,
 ) -> None:
     """
     Remove all metadata (EXIF, GPS, camera info, copyright) and compress a JPG image.
@@ -30,6 +31,7 @@ def compress_image(
         quality (int): JPG quality (1-95). Lower = more compression.
         max_width (int): Optional max width.
         max_height (int): Optional max height.
+        delete_original (bool): Whether to delete the original JPG file after successful compression.
     """
 
     try:
@@ -51,6 +53,10 @@ def compress_image(
                 progressive=True,
             )
 
+        # Only delete original file if output exists and flag is set
+        if delete_original and os.path.isfile(output_file):
+            os.remove(input_file)
+
     except Exception as e:
         print(f" ❌ \033[1;35mError processing \033[1;36m{input_file}\033[1;35m:\033[1;36m {e}\033[0m", file=sys.stderr)
         sys.exit(1)
@@ -63,6 +69,7 @@ def single_file_mode(args) -> None:
     quality = args.quality
     max_width = args.max_width
     max_height = args.max_height
+    delete_original = args.delete_original
     verbose = args.verbose
 
     validate_quality(quality=quality)
@@ -71,15 +78,17 @@ def single_file_mode(args) -> None:
     log(verbose=verbose,
         message=f"\n 🚀 \033[1;37m Processing:\033[1;32m  {Path(input_file).name}\033[0m")
 
+    input_size = str(os.path.getsize(input_file) / 1000000)
+
     compress_image(
         input_file=input_file,
         output_file=output_file,
         quality=quality,
         max_width=max_width,
         max_height=max_height,
+        delete_original=delete_original,
     )
 
-    input_size = str(os.path.getsize(input_file) / 1000000)
     output_size = str(os.path.getsize(output_file) / 1000000)
 
     log(verbose=verbose,
@@ -93,6 +102,7 @@ def batch_file_mode(args) -> None:
     quality = args.quality
     max_width = args.max_width
     max_height = args.max_height
+    delete_original = args.delete_original
     recursive = args.recursive
     verbose = args.verbose
 
@@ -121,15 +131,17 @@ def batch_file_mode(args) -> None:
         log(verbose=verbose,
             message=f"\n 🚀 \033[1;37m Processing:\033[1;32m  {jpg.name}\033[0m")
 
+        input_size = str(os.path.getsize(jpg) / 1000000)
+
         compress_image(
             input_file=jpg,
             output_file=output_file,
             quality=quality,
             max_width=max_width,
             max_height=max_height,
+            delete_original=delete_original,
         )
 
-        input_size = str(os.path.getsize(jpg) / 1000000)
         output_size = str(os.path.getsize(output_file) / 1000000)
 
         log(verbose=verbose,
@@ -203,6 +215,7 @@ def main():
     parser.add_argument("--max-width", type=int, default=None, help="Optional max width to resize")
     parser.add_argument("--max-height", type=int, default=None, help="Optional max height to resize")
 
+    parser.add_argument("--delete-original", action="store_true", help="Delete original JPG files after successful compression")
     parser.add_argument("-r", "--recursive", action="store_true", help="Recursively process subfolders (only with --input-folder)")
     parser.add_argument("-v", "--verbose", action="store_true", help="Enable verbose output")
 
