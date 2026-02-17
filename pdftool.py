@@ -83,12 +83,13 @@ def compress_pdf(input_path: str, output_path: str, quality: str = "ebook") -> N
         sys.exit(1)
 
 
-def process_file(input_file: str, output_file: str, compression: str) -> None:
+def process_file(input_file: str, output_file: str, compression: str, delete_original: bool = False) -> None:
     """
     Args:
         input_file (str): Path to the input PDF file.
         output_file (str): Path to save the output PDF file.
         compression (str): Compression level.
+        delete_original (bool): Whether to delete the original PDF file after successful processing.
     """
 
     temp_file = "__temp.pdf"
@@ -96,6 +97,10 @@ def process_file(input_file: str, output_file: str, compression: str) -> None:
     try:
         compress_pdf(input_path=input_file, output_path=temp_file, quality=compression)
         strip_pdf_metadata(input_path=temp_file, output_path=output_file)
+
+        # Only delete original file if output exists and flag is set
+        if delete_original and os.path.isfile(output_file):
+            os.remove(input_file)
 
     finally:
         # Delete temporary file
@@ -108,6 +113,7 @@ def single_file_mode(args) -> None:
     output_file = args.output if args.output else f"{Path(input_file).stem}_compressed.pdf"
 
     compression = args.compression
+    delete_original = args.delete_original
     verbose = args.verbose
 
     validate_compression_level(compression=compression)
@@ -116,9 +122,10 @@ def single_file_mode(args) -> None:
     log(verbose=verbose,
         message=f"\n 🚀 \033[1;37m Processing:\033[1;32m  {Path(input_file).name}\033[0m")
 
-    process_file(input_file=input_file, output_file=output_file, compression=compression)
-
     input_size = str(os.path.getsize(input_file) / 1000000)
+
+    process_file(input_file=input_file, output_file=output_file, compression=compression, delete_original=delete_original)
+
     output_size = str(os.path.getsize(output_file) / 1000000)
 
     log(verbose=verbose,
@@ -130,6 +137,7 @@ def batch_file_mode(args) -> None:
     output_folder = Path(args.output_folder) if args.output_folder else Path(f"{input_folder}_compressed")
 
     compression = args.compression
+    delete_original = args.delete_original
     recursive = args.recursive
     verbose = args.verbose
 
@@ -154,9 +162,10 @@ def batch_file_mode(args) -> None:
         log(verbose=verbose,
             message=f"\n 🚀 \033[1;37m Processing:\033[1;32m  {pdf.name}\033[0m")
 
-        process_file(input_file=pdf, output_file=output_file, compression=compression)
-
         input_size = str(os.path.getsize(pdf) / 1000000)
+
+        process_file(input_file=pdf, output_file=output_file, compression=compression, delete_original=delete_original)
+
         output_size = str(os.path.getsize(output_file) / 1000000)
 
         log(verbose=verbose,
@@ -256,6 +265,7 @@ def main():
         ),
     )
 
+    parser.add_argument("--delete-original", action="store_true", help="Delete original PDF files after successful compression")
     parser.add_argument("-r", "--recursive", action="store_true", help="Recursively process subfolders (only with --input-folder)")
     parser.add_argument("-v", "--verbose", action="store_true", help="Enable verbose output")
 
