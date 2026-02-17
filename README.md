@@ -3,6 +3,7 @@
 A simple CLI toolkit to compress PDF and image files while removing metadata. Supports batch processing, recursive folder scanning, and customizable compression levels. Powered by Python and Ghostscript.
 
 Supports:
+
 - ✅ PDF compression with Ghostscript
 - ✅ Image compression using Pillow
 - ✅ Metadata removal from PDFs and images
@@ -16,6 +17,7 @@ Supports:
 ## 🎯 Features
 
 - 📄 **PDF Tool (`pdftool`)**
+
   - Compress PDF files at different quality levels using Ghostscript
   - Remove all metadata (Title, Author, Info dictionary, XMP, Metadata streams)
   - Handle case-insensitive file extensions (`.pdf`, `.PDF`, `.pDf`, …)
@@ -28,6 +30,7 @@ Supports:
     - If the output file already exists, asks for confirmation before overwriting
 
 - 🖼️ **Image Tool (`imgtool`)**
+
   - Compress JPG images with adjustable quality (1–95)
   - Strip all metadata (EXIF, GPS, camera info, copyright)
   - Optional image resizing by width/height
@@ -101,26 +104,28 @@ python pdftool.py --input input.pdf --output output.pdf --compression ebook --ve
 
 #### ✅ Compression Levels
 
-| Option    | Description                               | DPI      | File Size  |
-|-----------|-------------------------------------------|----------|------------|
-| screen    | Lowest quality, smallest size             | 72 dpi   | Tiny       |
-| ebook     | Medium quality for e-books                | 150 dpi  | Small      |
-| printer   | High quality for printing                 | 300 dpi  | Larger     |
-| prepress  | Maximum quality for professional use      | 300+ dpi | Largest    |
-| default   | Similar to `screen`                       | ~72 dpi  | Small      |
+| Option   | Description                          | DPI      | File Size |
+| -------- | ------------------------------------ | -------- | --------- |
+| screen   | Lowest quality, smallest size        | 72 dpi   | Tiny      |
+| ebook    | Medium quality for e-books           | 150 dpi  | Small     |
+| printer  | High quality for printing            | 300 dpi  | Larger    |
+| prepress | Maximum quality for professional use | 300+ dpi | Largest   |
+| default  | Similar to `screen`                  | ~72 dpi  | Small     |
 
 #### 🔧 Command-Line Options
 
-| Argument              | Description                                  |
-|-----------------------|----------------------------------------------|
-| `-i, --input`         | Input PDF file path                          |
-| `-o, --output`        | Output PDF file path                         |
-| `-I, --input-folder`  | Input folder (for batch mode)                |
-| `-O, --output-folder` | Output folder (for batch mode)               |
-| `-c, --compression`   | Compression level (`screen`, `ebook`, ...)   |
-| `-r, --recursive`     | Process subfolders (only with input-folder)  |
-| `-v, --verbose`       | Print detailed output                        |
-| `-h, --help`          | Show all command-line options                |
+| Argument              | Description                                            |
+| --------------------- | ------------------------------------------------------ |
+| `-i, --input`         | Input PDF file path                                    |
+| `-o, --output`        | Output PDF file path                                   |
+| `-I, --input-folder`  | Input folder (for batch mode)                          |
+| `-O, --output-folder` | Output folder (for batch mode)                         |
+| `-c, --compression`   | Compression level (`screen`, `ebook`, ...)             |
+| `--delete-original`   | Delete original PDF files after successful compression |
+| `-f, --force`         | Overwrite output files without confirmation            |
+| `-r, --recursive`     | Process subfolders (only with input-folder)            |
+| `-v, --verbose`       | Print detailed output                                  |
+| `-h, --help`          | Show all command-line options                          |
 
 #### ✅ Examples
 
@@ -146,18 +151,20 @@ python imgtool.py --input input.jpg --output output.jpg --quality 75 --verbose
 
 #### 🔧 Command-Line Options
 
-| Argument              | Description                                  |
-|-----------------------|----------------------------------------------|
-| `-i, --input`         | Input image file path                        |
-| `-o, --output`        | Output image file path                       |
-| `-I, --input-folder`  | Input folder (for batch mode)                |
-| `-O, --output-folder` | Output folder (for batch mode)               |
-| `-q, --quality`       | JPG quality (default 85, range 1-95)         |
-| `-r, --recursive`     | Process subfolders (only with input-folder)  |
-| `--max-width`         | Max width to resize (optional)               |
-| `--max-height`        | Max height to resize (optional)              |
-| `-v, --verbose`       | Print detailed output                        |
-| `-h, --help`          | Show all command-line options                |
+| Argument              | Description                                            |
+| --------------------- | ------------------------------------------------------ |
+| `-i, --input`         | Input image file path                                  |
+| `-o, --output`        | Output image file path                                 |
+| `-I, --input-folder`  | Input folder (for batch mode)                          |
+| `-O, --output-folder` | Output folder (for batch mode)                         |
+| `-q, --quality`       | JPG quality (default 85, range 1-95)                   |
+| `--max-width`         | Max width to resize (optional)                         |
+| `--max-height`        | Max height to resize (optional)                        |
+| `--delete-original`   | Delete original JPG files after successful compression |
+| `-f, --force`         | Overwrite output files without confirmation            |
+| `-r, --recursive`     | Process subfolders (only with input-folder)            |
+| `-v, --verbose`       | Print detailed output                                  |
+| `-h, --help`          | Show all command-line options                          |
 
 #### ✅ Examples
 
@@ -181,10 +188,6 @@ This project is licensed under the [MIT License](LICENSE.md).
 
 ---
 
-## 🤝 Contributing
+## Author
 
-Pull requests are welcome. Feel free to open issues for suggestions, bugs, or enhancements.
-
----
-
-## 🎖️ Give it a star if you like this project!
+[**@th92rodr**](https://github.com/th92rodr)
