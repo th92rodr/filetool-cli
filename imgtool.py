@@ -70,10 +70,11 @@ def single_file_mode(args) -> None:
     max_width = args.max_width
     max_height = args.max_height
     delete_original = args.delete_original
+    force = args.force
     verbose = args.verbose
 
     validate_quality(quality=quality)
-    validate_args_single_file(input_file=input_file, output_file=output_file)
+    validate_args_single_file(input_file=input_file, output_file=output_file, force=force)
 
     log(verbose=verbose,
         message=f"\n 🚀 \033[1;37m Processing:\033[1;32m  {Path(input_file).name}\033[0m")
@@ -158,7 +159,7 @@ def validate_quality(quality: int) -> None:
         sys.exit(2)
 
 
-def validate_args_single_file(input_file: str, output_file: str) -> None:
+def validate_args_single_file(input_file: str, output_file: str, force: bool = False) -> None:
     # Check if the input file exists
     if not os.path.isfile(input_file):
         print(f" ❌ \033[1;35mInput file does not exist:\033[1;36m {input_file}\033[0m", file=sys.stderr)
@@ -170,21 +171,17 @@ def validate_args_single_file(input_file: str, output_file: str) -> None:
         sys.exit(2)
 
     # Check if the output file is a .jpg file
-    if not output_file.lower().endswith((".jpg", ".jpeg")):
+    if not output_file.lower().endswith((".jpg", ".jpeg")) and not force:
         ask = f" ❔ \033[1;31mOutput file \033[1;36m\"{output_file}\"\033[1;31m does not end with (\".jpg\", \".jpeg\"). Are you sure you want to continue?\033[1;36m (y/n)\033[0m "
         confirm = input(ask)
-        if confirm in ("No", "no", "N", "n"):
-            sys.exit(2)
-        elif confirm not in ("Yes", "yes", "Y", "y"):
+        if confirm.lower() not in ("yes", "y"):
             sys.exit(2)
 
     # Check to make sure the user really wants to overwrite the existing file with the new output file
-    if os.path.isfile(output_file):
+    if os.path.isfile(output_file) and not force:
         ask = f" ❔ \033[1;31mOutput file \033[1;36m\"{output_file}\"\033[1;31m already exists. Are you sure you want to overwrite it?\033[1;36m (y/n)\033[0m "
         confirm = input(ask)
-        if confirm in ("No", "no", "N", "n"):
-            sys.exit(2)
-        elif confirm not in ("Yes", "yes", "Y", "y"):
+        if confirm.lower() not in ("yes", "y"):
             sys.exit(2)
 
 
@@ -216,6 +213,7 @@ def main():
     parser.add_argument("--max-height", type=int, default=None, help="Optional max height to resize")
 
     parser.add_argument("--delete-original", action="store_true", help="Delete original JPG files after successful compression")
+    parser.add_argument("-f", "--force", action="store_true", help="Overwrite output files without confirmation")
     parser.add_argument("-r", "--recursive", action="store_true", help="Recursively process subfolders (only with --input-folder)")
     parser.add_argument("-v", "--verbose", action="store_true", help="Enable verbose output")
 
